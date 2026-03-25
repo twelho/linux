@@ -1029,26 +1029,6 @@ static void cached_dev_write(struct cached_dev *dc, struct search *s)
 	} else if (s->iop.writeback) {
 		bch_writeback_add(dc);
 		s->iop.bio = bio;
-
-		if (bio->bi_opf & REQ_PREFLUSH) {
-			/*
-			 * Also need to send a flush to the backing
-			 * device.
-			 */
-			struct bio *flush;
-
-			flush = bio_alloc_bioset(bio->bi_bdev, 0,
-						 REQ_OP_WRITE | REQ_PREFLUSH,
-						 GFP_NOIO, &dc->disk.bio_split);
-			if (!flush) {
-				s->iop.status = BLK_STS_RESOURCE;
-				goto insert_data;
-			}
-			flush->bi_end_io = backing_request_endio;
-			flush->bi_private = cl;
-			/* I/O request sent to backing device */
-			closure_bio_submit(s->iop.c, flush, cl);
-		}
 	} else {
 		s->iop.bio = bio_alloc_clone(bio->bi_bdev, bio, GFP_NOIO,
 					     &dc->disk.bio_split);
@@ -1069,10 +1049,6 @@ static CLOSURE_CALLBACK(cached_dev_nodata)
 
 	if (s->iop.flush_journal)
 		bch_journal_meta(s->iop.c, cl);
-
-	/* If it's a flush, we send the flush to the backing device too */
-	bio->bi_end_io = backing_request_endio;
-	closure_bio_submit(s->iop.c, bio, cl);
 
 	continue_at(cl, cached_dev_bio_complete, NULL);
 }
