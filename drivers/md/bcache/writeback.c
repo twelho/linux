@@ -1053,7 +1053,7 @@ void bch_cached_dev_writeback_init(struct cached_dev *dc)
 	dc->writeback_metadata		= true;
 	dc->writeback_running		= false;
 	dc->writeback_consider_fragment = true;
-	dc->writeback_percent		= 10;
+	dc->writeback_percent		= 50;
 	dc->writeback_delay		= 30;
 	atomic_long_set(&dc->writeback_rate.rate, 1024);
 	dc->writeback_rate_minimum	= 8;

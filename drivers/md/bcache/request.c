@@ -20,7 +20,7 @@
 
 #include <trace/events/bcache.h>
 
-#define CUTOFF_CACHE_ADD	95
+#define CUTOFF_CACHE_ADD	100
 #define CUTOFF_CACHE_READA	90
 
 struct kmem_cache *bch_search_cache;

@@ -2,11 +2,11 @@
 #ifndef _BCACHE_WRITEBACK_H
 #define _BCACHE_WRITEBACK_H
 
-#define CUTOFF_WRITEBACK	40
-#define CUTOFF_WRITEBACK_SYNC	70
+#define CUTOFF_WRITEBACK	100
+#define CUTOFF_WRITEBACK_SYNC	100
 
-#define CUTOFF_WRITEBACK_MAX		70
-#define CUTOFF_WRITEBACK_SYNC_MAX	90
+#define CUTOFF_WRITEBACK_MAX		100
+#define CUTOFF_WRITEBACK_SYNC_MAX	100
 
 #define MAX_WRITEBACKS_IN_PASS  5
 #define MAX_WRITESIZE_IN_PASS   5000	/* *512b */
@@ -102,27 +102,14 @@ extern unsigned int bch_cutoff_writeback_sync;
 static inline bool should_writeback(struct cached_dev *dc, struct bio *bio,
 				    unsigned int cache_mode, bool would_skip)
 {
-	unsigned int in_use = dc->disk.c->gc_stats.in_use;
-
 	if (cache_mode != CACHE_MODE_WRITEBACK ||
-	    test_bit(BCACHE_DEV_DETACHING, &dc->disk.flags) ||
-	    in_use > bch_cutoff_writeback_sync)
+	    test_bit(BCACHE_DEV_DETACHING, &dc->disk.flags))
 		return false;
 
 	if (bio_op(bio) == REQ_OP_DISCARD)
 		return false;
 
-	if (dc->partial_stripes_expensive &&
-	    bcache_dev_stripe_dirty(dc, bio->bi_iter.bi_sector,
-				    bio_sectors(bio)))
-		return true;
-
-	if (would_skip)
-		return false;
-
-	return (op_is_sync(bio->bi_opf) ||
-		bio->bi_opf & (REQ_META|REQ_PRIO) ||
-		in_use <= bch_cutoff_writeback);
+	return true;
 }
 
 static inline void bch_writeback_queue(struct cached_dev *dc)

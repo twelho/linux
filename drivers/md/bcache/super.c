@@ -2288,7 +2288,7 @@ static int cache_alloc(struct cache *ca)
 	 */
 	btree_buckets = clamp_t(size_t, ca->sb.nbuckets >> 7,
 				32, SB_JOURNAL_BUCKETS);
-	free = roundup_pow_of_two(ca->sb.nbuckets) >> 10;
+	free = roundup_pow_of_two(ca->sb.nbuckets) >> 7;
 	if (!free) {
 		ret = -EPERM;
 		err = "ca->sb.nbuckets is too small";
@@ -2943,6 +2943,8 @@ static int __init bcache_init(void)
 	bch_debug_init();
 
 	bcache_is_reboot = false;
+
+	pr_info("[twelho] bcache patched: forced writeback, no bypass cutoff, enlarged freelists");
 
 	return 0;
 err:
