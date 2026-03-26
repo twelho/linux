@@ -434,7 +434,7 @@ static CLOSURE_CALLBACK(write_dirty)
 	 */
 	if (KEY_DIRTY(&w->key)) {
 		dirty_init(w);
-		io->bio.bi_opf = REQ_OP_WRITE;
+		io->bio.bi_opf = REQ_OP_WRITE | REQ_FUA;
 		io->bio.bi_iter.bi_sector = KEY_START(&w->key);
 		bio_set_dev(&io->bio, io->dc->bdev);
 		io->bio.bi_end_io	= dirty_endio;
